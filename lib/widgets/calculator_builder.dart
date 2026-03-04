@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 
-/// Reusable input field for calculator screens
-Widget buildField(TextEditingController ctrl, String label, String hint) {
+/// ==============================
+/// INPUT FIELD
+/// ==============================
+Widget buildField(
+  TextEditingController ctrl,
+  String label,
+  String hint,
+) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -18,26 +24,48 @@ Widget buildField(TextEditingController ctrl, String label, String hint) {
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.07),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.white.withOpacity(0.12)),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.12),
+          ),
         ),
         child: TextField(
           controller: ctrl,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          style: const TextStyle(color: Colors.white, fontSize: 16),
+          keyboardType:
+              const TextInputType.numberWithOptions(decimal: true),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+          ),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 14),
+            hintStyle:
+                TextStyle(color: Colors.white.withOpacity(0.3)),
             border: InputBorder.none,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 18,
+              vertical: 16,
+            ),
           ),
         ),
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: 20),
     ],
   );
 }
 
-/// Reusable full calculator screen layout
+/// ==============================
+/// NUMBER FORMATTER (NO 0000)
+/// ==============================
+String formatNumber(double value) {
+  return value
+      .toStringAsFixed(4) // max 4 decimal
+      .replaceAll(RegExp(r'0+$'), '') // hapus nol belakang
+      .replaceAll(RegExp(r'\.$'), ''); // hapus titik jika kosong
+}
+
+/// ==============================
+/// CALCULATOR SCREEN TEMPLATE
+/// ==============================
 Widget buildCalculatorScreen({
   required BuildContext context,
   required String title,
@@ -46,194 +74,113 @@ Widget buildCalculatorScreen({
   required Color glowColor,
   required IconData icon,
   required List<Widget> fields,
-  required double? result,
+  required double? result, // ✅ FIX: sekarang nullable
   required String unit,
   required VoidCallback onCalc,
 }) {
   return Scaffold(
     backgroundColor: const Color(0xFF1A0A10),
-    body: Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF1A0A10),
-            Color(0xFF2E0D1A),
-            Color(0xFF1A0A14),
-          ],
-        ),
-      ),
-      child: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Back button
-              GestureDetector(
+    body: SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+
+            /// BACK BUTTON
+            Align(
+              alignment: Alignment.centerLeft,
+              child: GestureDetector(
                 onTap: () => Navigator.pop(context),
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.07),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.white.withOpacity(0.1)),
-                  ),
-                  child: const Icon(
-                    Icons.arrow_back_ios_new_rounded,
-                    color: Colors.white70,
-                    size: 18,
-                  ),
+                child: const Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  color: Colors.white70,
                 ),
               ),
+            ),
 
-              const SizedBox(height: 32),
+            const SizedBox(height: 30),
 
-              // Hero icon
-              Center(
-                child: Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(colors: gradientColors),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: glowColor.withOpacity(0.4),
-                        blurRadius: 32,
-                        spreadRadius: 4,
-                      ),
-                    ],
-                  ),
-                  child: Icon(icon, color: Colors.white, size: 48),
+            /// ICON
+            Icon(icon, color: glowColor, size: 70),
+            const SizedBox(height: 16),
+
+            /// TITLE
+            Text(
+              'Volume $title',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 6),
+
+            /// FORMULA
+            Text(
+              formula,
+              style: TextStyle(
+                color: glowColor,
+                fontSize: 16,
+              ),
+            ),
+
+            const SizedBox(height: 30),
+
+            /// INPUT FIELDS
+            ...fields,
+
+            /// BUTTON
+            ElevatedButton(
+              onPressed: onCalc,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: glowColor,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 40,
+                  vertical: 16,
                 ),
               ),
+              child: const Text("Hitung Volume"),
+            ),
 
-              const SizedBox(height: 24),
+            const SizedBox(height: 30),
 
-              Center(
-                child: Text(
-                  'Volume $title',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.5,
-                  ),
+            /// RESULT CARD
+            if (result != null)
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: glowColor),
                 ),
-              ),
-              const SizedBox(height: 6),
-              Center(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: glowColor.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: glowColor.withOpacity(0.3)),
-                  ),
-                  child: Text(
-                    formula,
-                    style: TextStyle(
-                      color: glowColor,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 40),
-
-              // Input fields
-              ...fields,
-
-              // Calculate button
-              GestureDetector(
-                onTap: onCalc,
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(colors: gradientColors),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: glowColor.withOpacity(0.4),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'Hitung Volume',
+                child: Column(
+                  children: [
+                    const Text(
+                      "Hasil Volume",
                       style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.5,
+                        color: Colors.white70,
                       ),
                     ),
-                  ),
+                    const SizedBox(height: 10),
+                    Text(
+                      formatNumber(result),
+                      style: TextStyle(
+                        fontSize: 36,
+                        fontWeight: FontWeight.bold,
+                        color: glowColor,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      unit,
+                      style: const TextStyle(
+                        color: Colors.white54,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-
-              // Result box
-              if (result != null) ...[
-                const SizedBox(height: 32),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(28),
-                  decoration: BoxDecoration(
-                    color: glowColor.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: glowColor.withOpacity(0.25),
-                      width: 1.5,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: glowColor.withOpacity(0.1),
-                        blurRadius: 24,
-                        spreadRadius: 2,
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Hasil Volume',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.5),
-                          fontSize: 13,
-                          letterSpacing: 1,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        result.toStringAsFixed(4),
-                        style: TextStyle(
-                          color: glowColor,
-                          fontSize: 40,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -1,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        unit,
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.4),
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ],
-          ),
+          ],
         ),
       ),
     ),

@@ -2,18 +2,22 @@ import 'package:flutter/material.dart';
 import '../widgets/calculator_builder.dart';
 
 class KubusScreen extends StatefulWidget {
+  const KubusScreen({super.key});
+
   @override
-  _KubusScreenState createState() => _KubusScreenState();
+  State<KubusScreen> createState() => _KubusScreenState();
 }
 
 class _KubusScreenState extends State<KubusScreen> {
   final TextEditingController _sController = TextEditingController();
-  double? _result;
+  double _result = 0.0;
 
   void _calculate() {
     final s = double.tryParse(_sController.text);
     if (s != null) {
-      setState(() => _result = s * s * s);
+      setState(() {
+        _result = s * s * s;
+      });
     }
   }
 
@@ -23,14 +27,14 @@ class _KubusScreenState extends State<KubusScreen> {
       context: context,
       title: 'Kubus',
       formula: 'V = s³',
-      gradientColors: [Color(0xFFFF6EB4), Color(0xFFCC2277)],
-      glowColor: Color(0xFFFF6EB4),
+      gradientColors: const [Color(0xFFFF6EB4), Color(0xFFCC2277)],
+      glowColor: const Color(0xFFFF6EB4),
       icon: Icons.crop_square_rounded,
       fields: [
-        buildField(_sController, 'Sisi (s)', 'Panjang sisi kubus'),
+        buildField(_sController, 'Sisi (s)', 'Masukkan panjang sisi'),
       ],
       result: _result,
-      unit: 'satuan³',
+      unit: 'cm³',
       onCalc: _calculate,
     );
   }
